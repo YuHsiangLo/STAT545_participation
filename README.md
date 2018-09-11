@@ -1,3 +1,3 @@
-# Exploration merge conflict
+# Exploration of GitHub and R
 
 This repo is part of a STAT 545 exercise to explore GitHub and markdown.
