@@ -164,7 +164,13 @@ For any generic output, we can use dplyr's `do()` function -- but that's a topic
 Calculate the growth in population since the first year on record _for each country_. `first()` is useful.
 
 ```{r}
+gapminder %>%
+  group_by(country) %>%
+  mutate(growth = pop - first(pop))  # This will honor the group_by(country)
 
+gapminder %>%
+  group_by(country) %>%
+  mutate(change = pop - lag(pop))  # This will honor the group_by(country)
 ```
 
 Notice that `dplyr` has retained the original grouping.
@@ -172,7 +178,9 @@ Notice that `dplyr` has retained the original grouping.
 How about growth compared to `1972`?
 
 ```{r}
-
+gapminder %>%
+  group_by(country) %>%
+  mutate(growth = pop - pop[year == 1972])
 ```
 
 Make a new variable `pop_last_time`, as the "lag-1" population -- that is, the population from the previous entry of that country. Use the `lag` function.
@@ -192,12 +200,30 @@ Your turn: Use what we learned to answer the following questions.
 1. Determine the country that experienced the sharpest 5-year drop in life expectancy, in each continent.
 
 ```{r}
-
+gapminder %>%
+  group_by(continent, country) %>%
+  mutate(gain = lifeExp - lag(lifeExp)) %>%
+  filter(!is.na(gain)) %>%
+  summarise(min = min(gain)) %>%
+  summarise(min = min(min)) %>%
+  arrange(min)
 ```
 
 2. Compute the relative gdp (NOT per capita!) of each country compared to Canada (= GDP of a country / GDP of Canada).
 
 ```{r}
+cda <- gapminder %>%
+  mutate(gdp = gdpPercap * pop) %>%
+  filter(country == 'Canada') %>%
+  `[[`('gdp')
+
+my_df <-gapminder %>%
+  mutate(cda_gdp = rep(cda, nlevels(country)),
+         gdp = gdpPercap * pop,
+         rel_gdp = gdp/cda_gdp)
+
+my_df %>% filter(country == 'Canada')
+summary(my_df$rel_gdp)
 
 ```
 
@@ -221,5 +247,13 @@ Practice these concepts in the following exercises. It might help you to first i
 1. Convert the population to a number in billions.
 
 2. Compute the change in population from 1962 to 1972 for each country.
+
+```{r}
+gapminder %>%
+  filter(year == 1962 | year == 1972) %>%
+  group_by(country) %>%
+  mutate(change = pop - pop[year == 1962])
+```
+
 
 3. Rank the continents by GDP per capita. You should have two columns: one with continent, and another with the ranking (1 through 5). __Hint__: use the `rank()` or `min_rank()` function.
