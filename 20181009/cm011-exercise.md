@@ -66,11 +66,68 @@ print(class(sum))
 
 Usually, there's no need to fuss about these differences: just use the `is.*()` family of functions. Give it a try:
 
+``` r
+is.numeric(a)
+```
+
+    ## [1] TRUE
+
+``` r
+is.data.frame(iris)
+```
+
+    ## [1] TRUE
+
 We can also coerce objects to take on a different form, typically using the `as.*()` family of functions. We can't always coerce! You'll get a sense of this over time, but try:
 
 -   Coercing a number to a character.
 -   Coercing a character to a number.
 -   Coercing a number to a data.frame. `letters` to a data.frame.
+
+``` r
+as.character(100)
+```
+
+    ## [1] "100"
+
+``` r
+as.numeric("100")
+```
+
+    ## [1] 100
+
+``` r
+#as.numeric("hello")  # won't work well
+as.data.frame(letters)
+```
+
+    ##    letters
+    ## 1        a
+    ## 2        b
+    ## 3        c
+    ## 4        d
+    ## 5        e
+    ## 6        f
+    ## 7        g
+    ## 8        h
+    ## 9        i
+    ## 10       j
+    ## 11       k
+    ## 12       l
+    ## 13       m
+    ## 14       n
+    ## 15       o
+    ## 16       p
+    ## 17       q
+    ## 18       r
+    ## 19       s
+    ## 20       t
+    ## 21       u
+    ## 22       v
+    ## 23       w
+    ## 24       x
+    ## 25       y
+    ## 26       z
 
 There is also a slight difference between coercion and conversion, but this is usually not important.
 
@@ -92,15 +149,88 @@ mtcars$hp
 
 Use the `c()` function to make a vector consisting of the course code (`"STAT"` and `545`). Notice the coercion. Vectors must be homogeneous.
 
+``` r
+(course <- c("STAT", 545))
+```
+
+    ## [1] "STAT" "545"
+
 Subset the first entry. Remove the first entry. Note the base-1 system.
+
+``` r
+course[1]
+```
+
+    ## [1] "STAT"
+
+``` r
+course[-1]
+```
+
+    ## [1] "545"
+
+``` r
+course
+```
+
+    ## [1] "STAT" "545"
 
 Use `<-` to change the second entry to "545A". Using the same approach, add a third entry, "S01".
 
+``` r
+course[2] <- "545A"
+course[3] <- "S01"
+course
+```
+
+    ## [1] "STAT" "545A" "S01"
+
+``` r
+# This will put NA anywhere else if the index is not immediately after the last one
+```
+
 Subset the first and third entry. Order matters! Subset the third and first entry.
+
+``` r
+course[c(3, 1)]
+```
+
+    ## [1] "S01"  "STAT"
 
 Explore integer sequences, especially negatives and directions. Especially `1:0` that might show up in loops!
 
+``` r
+3:10
+```
+
+    ## [1]  3  4  5  6  7  8  9 10
+
+``` r
+10:-5
+```
+
+    ##  [1] 10  9  8  7  6  5  4  3  2  1  0 -1 -2 -3 -4 -5
+
+``` r
+#vector of length 0
+seq_len(0)
+```
+
+    ## integer(0)
+
+``` r
+seq_len(10)
+```
+
+    ##  [1]  1  2  3  4  5  6  7  8  9 10
+
 Singletons are also vectors. Check using `is.vector`.
+
+``` r
+is.vector(6)
+```
+
+    ## [1] TRUE
 
 ### Vectorization and Recycling
 
@@ -120,15 +250,78 @@ A key aspect of R is its vectorization. Let's work with the vector following vec
 
 Square each component:
 
+``` r
+a^2
+```
+
+    ##  [1] 49 36 25 16  9  4  1  0  1  4
+
 Multiply each component by 1 through its length:
+
+``` r
+a * 1:10
+```
+
+    ##  [1]   7  12  15  16  15  12   7   0  -9 -20
 
 It's important to know that R will silently recycle! Unless the length of one vector is not divisible by the other. Let's see:
 
+``` r
+a * 1:3
+```
+
+    ## Warning in a * 1:3: longer object length is not a multiple of shorter
+    ## object length
+
+    ##  [1]  7 12 15  4  6  6  1  0 -3 -2
+
 This is true of comparison operators, too. Make a vector of logicals using a comparison operator.
+
+``` r
+a > 0
+```
+
+    ##  [1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
 
 Now try a boolean operator. Note that && and || are NOT vectorized!
 
+``` r
+a > 0 & a < 5
+```
+
+    ##  [1] FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
+
+``` r
+a > 0 && a < 5  # Useful in conditions: but only look at the first element
+```
+
+    ## [1] FALSE
+
+``` r
+any(a > 0 & a < 5)
+```
+
+    ## [1] TRUE
+
+``` r
+all(a > 0 & a < 5)
+```
+
+    ## [1] FALSE
+
 Recycling works with assignment, too. Replace the entire vector a with 1:2 repeated:
+
+``` r
+(a[1:n] <- 1:2)
+```
+
+    ## [1] 1 2
+
+``` r
+a
+```
+
+    ##  [1] 1 2 1 2 1 2 1 2 1 2
 
 ### Special Subsetting
 
@@ -146,11 +339,67 @@ Let's give the components some names ("subject", "code", and "section") using th
 
 -   Notice that the vector does not change!!
 
+``` r
+setNames(course, c("subject", "code", "section"))  # This doesn't change the vector
+```
+
+    ## subject    code section 
+    ##  "STAT"  "545A"   "S01"
+
+``` r
+course
+```
+
+    ## [1] "STAT" "545A" "S01"
+
 1.  Using the names function with `<-`. Also, just explore the names function.
 
-2.  Re-constructing the vector, specifying names within `c()`.
+``` r
+names(course) <- c("subject", "code", "section")  # This actually changes the vector
+course
+```
+
+    ## subject    code section 
+    ##  "STAT"  "545A"   "S01"
+
+1.  Re-constructing the vector, specifying names within `c()`.
+
+``` r
+course <- c(subject = "STAT", code = "545A", section = "S01")
+course
+```
+
+    ## subject    code section 
+    ##  "STAT"  "545A"   "S01"
 
 Subset the entry labelled "section" and "subject".
+
+``` r
+course["section"]
+```
+
+    ## section 
+    ##   "S01"
+
+``` r
+course[c("section", "subject")]
+```
+
+    ## section subject 
+    ##   "S01"  "STAT"
+
+``` r
+course[["section"]]
+```
+
+    ## [1] "S01"
+
+``` r
+foo <- c(a = 5, a = 6, b = 7)
+foo[["a"]]
+```
+
+    ## [1] 5
 
 Amazingly, we can also subset by a vector of logicals (which will be recycled!). Let's work with our integer sequence vector again:
 
@@ -166,12 +415,28 @@ Amazingly, we can also subset by a vector of logicals (which will be recycled!).
 
     ## [1] 10
 
+``` r
+a[a > 0]
+```
+
+    ## [1] 7 6 5 4 3 2 1
+
 Lists
 -----
 
 Unlike vectors, which are atomic/homogeneous, a list in R is heterogeneous.
 
 Try storing the course code (`"STAT"` and `545`) again, but this time in a list. Use the `list()` function.
+
+``` r
+(course <- list("STAT", 545))
+```
+
+    ## [[1]]
+    ## [1] "STAT"
+    ## 
+    ## [[2]]
+    ## [1] 545
 
 Lists can hold pretty much anything, and can also be named. Let's use the following list:
 
@@ -188,12 +453,51 @@ Lists can hold pretty much anything, and can also be named. Let's use the follow
     ## $fav_fun
     ## function (x) 
     ## .Internal(typeof(x))
-    ## <bytecode: 0x7f817f034ab0>
+    ## <bytecode: 0x7fd786c8eae8>
     ## <environment: namespace:base>
 
 Subsetting a list works similarly to vectors. Try subsetting the first element of `my_list`; try subsettig the first *component* of the list. Notice the difference!
 
+``` r
+my_list[2]
+```
+
+    ## $instructor
+    ## [1] "Vincenzo" "Coia"
+
+``` r
+my_list[2][1]
+```
+
+    ## $instructor
+    ## [1] "Vincenzo" "Coia"
+
+``` r
+my_list[[2]][1]
+```
+
+    ## [1] "Vincenzo"
+
 Try also subsetting by name:
+
+``` r
+my_list["year"]
+```
+
+    ## $year
+    ## [1] 2018
+
+``` r
+my_list[["year"]]
+```
+
+    ## [1] 2018
+
+``` r
+my_list$year
+```
+
+    ## [1] 2018
 
 Smells a little like `data.frame`s. It turns out a `data.frame` is a special type of list:
 
@@ -225,6 +529,18 @@ as.list(small_df)
     ## 
     ## $y
     ## [1] "a" "b" "c" "d" "e"
+
+``` r
+#Matrix
+diag(5)
+```
+
+    ##      [,1] [,2] [,3] [,4] [,5]
+    ## [1,]    1    0    0    0    0
+    ## [2,]    0    1    0    0    0
+    ## [3,]    0    0    1    0    0
+    ## [4,]    0    0    0    1    0
+    ## [5,]    0    0    0    0    1
 
 Note that there's a difference between a list of one object, and that object itself! This is different from vectors.
 
