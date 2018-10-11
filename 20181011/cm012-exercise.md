@@ -62,6 +62,18 @@ str(lotr2)
 Examples of problems encountered with factors. (ideas came from [R Bloggers](https://www.r-bloggers.com/factors-are-not-first-class-citizens-in-r/))
 
 ``` r
+head(iris)
+```
+
+    ##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+    ## 1          5.1         3.5          1.4         0.2  setosa
+    ## 2          4.9         3.0          1.4         0.2  setosa
+    ## 3          4.7         3.2          1.3         0.2  setosa
+    ## 4          4.6         3.1          1.5         0.2  setosa
+    ## 5          5.0         3.6          1.4         0.2  setosa
+    ## 6          5.4         3.9          1.7         0.4  setosa
+
+``` r
 iris %>% 
   mutate(Species = ifelse(Species == "versicolor", "vers", Species))
 ```
@@ -245,7 +257,7 @@ c(iris$Species, "setosa")
     ## [141] "3"      "3"      "3"      "3"      "3"      "3"      "3"     
     ## [148] "3"      "3"      "3"      "setosa"
 
--   Base R way of interacting with factors:
+-   ~~Base R~~ way of interacting with factors:
     -   `factor()`, or `forcats::parse_factor()`.
     -   `levels()`
     -   `nlevels()`
@@ -262,6 +274,47 @@ set.seed(10)
 
 Convert `draw` to a factor. What are the levels? How many are there? How many of each category was drawn?
 
+``` r
+(draw <- factor(draw))
+```
+
+    ##  [1] b a b c a a a a b b
+    ## Levels: a b c
+
+``` r
+(draw <- as.factor(draw))
+```
+
+    ##  [1] b a b c a a a a b b
+    ## Levels: a b c
+
+``` r
+levels(draw)
+```
+
+    ## [1] "a" "b" "c"
+
+``` r
+nlevels(draw)
+```
+
+    ## [1] 3
+
+``` r
+fct_count(draw)  # 這感覺很好用～
+```
+
+    ## # A tibble: 3 x 2
+    ##   f         n
+    ##   <fct> <int>
+    ## 1 a         5
+    ## 2 b         4
+    ## 3 c         1
+
+``` r
+# Most of them have the form fct_something
+```
+
 Concatenating Factors
 ---------------------
 
@@ -273,12 +326,49 @@ c(lotr1$Film, lotr2$Film)
 
     ## [1] 1 1 1 1 1 1
 
+``` r
+fct_c(lotr1$Film, lotr2$Film)
+```
+
+    ## [1] The Fellowship Of The Ring The Fellowship Of The Ring
+    ## [3] The Fellowship Of The Ring The Return Of The King    
+    ## [5] The Return Of The King     The Return Of The King    
+    ## Levels: The Fellowship Of The Ring The Return Of The King
+
 Try binding by row `lotr1` and `lotr2`:
 
 -   with `rbind()`
 -   with `bind_rows()`
 
 Which one is more lenient? Which would you prefer?
+
+``` r
+rbind(lotr1, lotr2) %>% str()
+```
+
+    ## 'data.frame':    6 obs. of  4 variables:
+    ##  $ Film  : Factor w/ 2 levels "The Fellowship Of The Ring",..: 1 1 1 2 2 2
+    ##  $ Race  : Factor w/ 3 levels "Elf","Hobbit",..: 1 2 3 1 2 3
+    ##  $ Female: int  1229 14 0 183 2 268
+    ##  $ Male  : int  971 3644 1995 510 2673 2459
+
+``` r
+bind_rows(lotr1, lotr2) %>% str()
+```
+
+    ## Warning in bind_rows_(x, .id): Unequal factor levels: coercing to character
+
+    ## Warning in bind_rows_(x, .id): binding character and factor vector,
+    ## coercing into character vector
+
+    ## Warning in bind_rows_(x, .id): binding character and factor vector,
+    ## coercing into character vector
+
+    ## 'data.frame':    6 obs. of  4 variables:
+    ##  $ Film  : chr  "The Fellowship Of The Ring" "The Fellowship Of The Ring" "The Fellowship Of The Ring" "The Return Of The King" ...
+    ##  $ Race  : Factor w/ 3 levels "Elf","Hobbit",..: 1 2 3 1 2 3
+    ##  $ Female: int  1229 14 0 183 2 268
+    ##  $ Male  : int  971 3644 1995 510 2673 2459
 
 Unused Levels
 -------------
@@ -291,6 +381,91 @@ nlevels(gap_gs$country)
 ```
 
     ## [1] 142
+
+``` r
+levels(gap_gs$country)
+```
+
+    ##   [1] "Afghanistan"              "Albania"                 
+    ##   [3] "Algeria"                  "Angola"                  
+    ##   [5] "Argentina"                "Australia"               
+    ##   [7] "Austria"                  "Bahrain"                 
+    ##   [9] "Bangladesh"               "Belgium"                 
+    ##  [11] "Benin"                    "Bolivia"                 
+    ##  [13] "Bosnia and Herzegovina"   "Botswana"                
+    ##  [15] "Brazil"                   "Bulgaria"                
+    ##  [17] "Burkina Faso"             "Burundi"                 
+    ##  [19] "Cambodia"                 "Cameroon"                
+    ##  [21] "Canada"                   "Central African Republic"
+    ##  [23] "Chad"                     "Chile"                   
+    ##  [25] "China"                    "Colombia"                
+    ##  [27] "Comoros"                  "Congo, Dem. Rep."        
+    ##  [29] "Congo, Rep."              "Costa Rica"              
+    ##  [31] "Cote d'Ivoire"            "Croatia"                 
+    ##  [33] "Cuba"                     "Czech Republic"          
+    ##  [35] "Denmark"                  "Djibouti"                
+    ##  [37] "Dominican Republic"       "Ecuador"                 
+    ##  [39] "Egypt"                    "El Salvador"             
+    ##  [41] "Equatorial Guinea"        "Eritrea"                 
+    ##  [43] "Ethiopia"                 "Finland"                 
+    ##  [45] "France"                   "Gabon"                   
+    ##  [47] "Gambia"                   "Germany"                 
+    ##  [49] "Ghana"                    "Greece"                  
+    ##  [51] "Guatemala"                "Guinea"                  
+    ##  [53] "Guinea-Bissau"            "Haiti"                   
+    ##  [55] "Honduras"                 "Hong Kong, China"        
+    ##  [57] "Hungary"                  "Iceland"                 
+    ##  [59] "India"                    "Indonesia"               
+    ##  [61] "Iran"                     "Iraq"                    
+    ##  [63] "Ireland"                  "Israel"                  
+    ##  [65] "Italy"                    "Jamaica"                 
+    ##  [67] "Japan"                    "Jordan"                  
+    ##  [69] "Kenya"                    "Korea, Dem. Rep."        
+    ##  [71] "Korea, Rep."              "Kuwait"                  
+    ##  [73] "Lebanon"                  "Lesotho"                 
+    ##  [75] "Liberia"                  "Libya"                   
+    ##  [77] "Madagascar"               "Malawi"                  
+    ##  [79] "Malaysia"                 "Mali"                    
+    ##  [81] "Mauritania"               "Mauritius"               
+    ##  [83] "Mexico"                   "Mongolia"                
+    ##  [85] "Montenegro"               "Morocco"                 
+    ##  [87] "Mozambique"               "Myanmar"                 
+    ##  [89] "Namibia"                  "Nepal"                   
+    ##  [91] "Netherlands"              "New Zealand"             
+    ##  [93] "Nicaragua"                "Niger"                   
+    ##  [95] "Nigeria"                  "Norway"                  
+    ##  [97] "Oman"                     "Pakistan"                
+    ##  [99] "Panama"                   "Paraguay"                
+    ## [101] "Peru"                     "Philippines"             
+    ## [103] "Poland"                   "Portugal"                
+    ## [105] "Puerto Rico"              "Reunion"                 
+    ## [107] "Romania"                  "Rwanda"                  
+    ## [109] "Sao Tome and Principe"    "Saudi Arabia"            
+    ## [111] "Senegal"                  "Serbia"                  
+    ## [113] "Sierra Leone"             "Singapore"               
+    ## [115] "Slovak Republic"          "Slovenia"                
+    ## [117] "Somalia"                  "South Africa"            
+    ## [119] "Spain"                    "Sri Lanka"               
+    ## [121] "Sudan"                    "Swaziland"               
+    ## [123] "Sweden"                   "Switzerland"             
+    ## [125] "Syria"                    "Taiwan"                  
+    ## [127] "Tanzania"                 "Thailand"                
+    ## [129] "Togo"                     "Trinidad and Tobago"     
+    ## [131] "Tunisia"                  "Turkey"                  
+    ## [133] "Uganda"                   "United Kingdom"          
+    ## [135] "United States"            "Uruguay"                 
+    ## [137] "Venezuela"                "Vietnam"                 
+    ## [139] "West Bank and Gaza"       "Yemen, Rep."             
+    ## [141] "Zambia"                   "Zimbabwe"
+
+``` r
+as.character(gap_gs$country)
+```
+
+    ##  [1] "Germany" "Germany" "Germany" "Germany" "Germany" "Germany" "Germany"
+    ##  [8] "Germany" "Germany" "Germany" "Germany" "Germany" "Sweden"  "Sweden" 
+    ## [15] "Sweden"  "Sweden"  "Sweden"  "Sweden"  "Sweden"  "Sweden"  "Sweden" 
+    ## [22] "Sweden"  "Sweden"  "Sweden"
 
 Sometimes keeping the levels is good. Other times, not.
 
@@ -305,6 +480,15 @@ gap_small <- gapminder %>%
 
 Exercise: Make a bar chart of the number of times a continent has a country with population &lt; 250,000 in the `gapminder` data set. Try with and without `scale_x_discrete(drop=FALSE)`.
 
+``` r
+gap_small %>%
+  ggplot(aes(x = continent)) +
+  geom_bar() +
+  scale_x_discrete(drop = FALSE) 
+```
+
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-12-1.png)
+
 **Example of when it's bad**: If you ever use the `levels()` function.
 
 How to fix by dropping levels:
@@ -317,6 +501,34 @@ Exercise: get rid of the unused factor levels for country and continent in diffe
 -   `droplevels()`
 -   `fct_drop()` inside `mutate()`
 -   Re-defining the variable as a factor
+
+``` r
+gap_small %>%
+  droplevels() %>%
+  str()  # Note the levels in the country variable
+```
+
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    41 obs. of  6 variables:
+    ##  $ country  : Factor w/ 7 levels "Bahrain","Comoros",..: 1 1 1 1 1 2 2 2 2 3 ...
+    ##  $ continent: Factor w/ 3 levels "Africa","Asia",..: 2 2 2 2 2 1 1 1 1 1 ...
+    ##  $ year     : int  1952 1957 1962 1967 1972 1952 1957 1962 1967 1952 ...
+    ##  $ lifeExp  : num  50.9 53.8 56.9 59.9 63.3 ...
+    ##  $ pop      : int  120447 138655 171863 202182 230800 153936 170928 191689 217378 63149 ...
+    ##  $ gdpPercap: num  9867 11636 12753 14805 18269 ...
+
+``` r
+gap_small %>%
+  mutate(continent = fct_drop(continent)) %>%
+  str()
+```
+
+    ## Classes 'tbl_df', 'tbl' and 'data.frame':    41 obs. of  6 variables:
+    ##  $ country  : Factor w/ 142 levels "Afghanistan",..: 8 8 8 8 8 27 27 27 27 36 ...
+    ##  $ continent: Factor w/ 3 levels "Africa","Asia",..: 2 2 2 2 2 1 1 1 1 1 ...
+    ##  $ year     : int  1952 1957 1962 1967 1972 1952 1957 1962 1967 1952 ...
+    ##  $ lifeExp  : num  50.9 53.8 56.9 59.9 63.3 ...
+    ##  $ pop      : int  120447 138655 171863 202182 230800 153936 170928 191689 217378 63149 ...
+    ##  $ gdpPercap: num  9867 11636 12753 14805 18269 ...
 
 Ordering
 --------
@@ -349,13 +561,21 @@ Reorder by frequency:
 
 ``` r
 cont %>% 
-  fct_infreq() %>% 
+  fct_infreq() %>%  # 這也很好用～
+  fct_rev() %>%
   qplot()
 ```
 
 ![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 Could also arrange by the order they appear in the factor with `fct_inorder()`.
+
+``` r
+draw %>% fct_inorder()
+```
+
+    ##  [1] b a b c a a a a b b
+    ## Levels: b a c
 
 ### Ordering by Another Variable
 
@@ -367,9 +587,17 @@ gap_asia_2007 <- gapminder %>%
 ggplot(gap_asia_2007, aes(lifeExp, country)) + geom_point()
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-17-1.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 Let's use `fct_reorder()` to reorder the countries of `gap_asia_2007` by life Expectancy, and produce the same plot:
+
+``` r
+gap_asia_2007 %>%
+  mutate(country = fct_reorder(country, lifeExp)) %>%
+  ggplot(aes(lifeExp, country)) + geom_point()
+```
+
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-19-1.png)
 
 What about when life Expectancy is not unique? Example: life expectancy of each continent:
 
@@ -378,18 +606,27 @@ ggplot(gapminder, aes(continent, lifeExp)) +
   geom_violin()
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-19-1.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-20-1.png)
 
 ``` r
 ggplot(gapminder, aes(continent, lifeExp)) +
   geom_boxplot()
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-19-2.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-20-2.png)
 
 `fct_reorder(f, x)` still works, but does some internal wrangling: a summary statistic (default: median) is computed on `x` for each category in the factor `f`.
 
 Exercise: Try making the above box plot and violin plots, ordered by median lifeExp. Try other functions to order by by modifying the `.fun` argument.
+
+``` r
+gapminder %>%
+  mutate(continent = fct_reorder(continent, lifeExp)) %>%
+  ggplot(aes(continent, lifeExp)) +
+  geom_boxplot()
+```
+
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-21-1.png)
 
 What if we have two variables plus a non-positional categorical variable? Example: Life expectancy for some select countries. Want legend "ordered by life expectancy" -- but what does that mean?
 
@@ -402,7 +639,7 @@ ggplot(gap_select, aes(year, lifeExp)) +
   geom_line(aes(group=country, colour=country))
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-21-1.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-22-1.png)
 
 Use `fct_reorder2(f, x, y)` to reorder factor `f`:
 
@@ -410,6 +647,15 @@ Use `fct_reorder2(f, x, y)` to reorder factor `f`:
 -   Default is `.fun = last2`, which looks at x-y plot for each category; uses the y-value furthest to the right.
 
 Exercise: Reorder the above line graph so that the legend is in order of last life expectancy. Useful for black-and-white printing!
+
+``` r
+gap_select %>%
+  mutate(country = fct_reorder2(country, year, lifeExp)) %>%  # 1st: factor wanted to change
+  ggplot(aes(year, lifeExp)) +
+  geom_line(aes(colour=country))
+```
+
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-23-1.png)
 
 ### Ordering "because I said so"
 
@@ -422,13 +668,13 @@ Here's how to use `fct_relevel()` to do that. Exercise: modify the code so that:
 
 ``` r
 gap_asia_2007$country %>% 
-  fct_relevel("Syria") %>% 
+  fct_relevel("Syria", "Sweden", after = 2) %>% 
   levels() %>% 
   head()
 ```
 
-    ## [1] "Syria"       "Afghanistan" "Albania"     "Algeria"     "Angola"     
-    ## [6] "Argentina"
+    ## [1] "Afghanistan" "Albania"     "Syria"       "Sweden"      "Algeria"    
+    ## [6] "Angola"
 
 Re-coding a Factor
 ------------------
@@ -466,7 +712,7 @@ cont %>%
   qplot()
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-26-1.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-27-1.png)
 
 More practically, we can lump the least frequent levels together as "Other". Modify the above code to use `fct_lump()` instead of `fct_collapse()` so that:
 
@@ -474,6 +720,14 @@ More practically, we can lump the least frequent levels together as "Other". Mod
 -   The bar chart shows the two least frequently observed continents (Hint: use negative `n`).
 -   You let `fct_lump()` decide on the number of non-other continents. How is this chosen?
 -   Note: you can manually specify non-other levels using `fct_other()`.
+
+``` r
+cont %>% 
+  fct_lump(n = 2) %>%  # The total of the combined ones are lower than the prevous bar
+  qplot()
+```
+
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-28-1.png)
 
 We can use the `w` argument to lump by another variable.
 
@@ -491,7 +745,7 @@ gap_africa %>%
     geom_violin()
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-28-1.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-29-1.png)
 
 Exercises
 ---------
@@ -517,7 +771,7 @@ gss_cat %>%
   geom_line(aes(group=partyid, colour=partyid))
 ```
 
-![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-31-1.png)
+![](cm012-exercise_files/figure-markdown_github/unnamed-chunk-32-1.png)
 
 Dates and Times with Lubridate
 ==============================
@@ -526,6 +780,18 @@ Goal here: some exposure to `lubridate`; know it exists.
 
 1.  Use different combinations of y, m, d to make a date time object.
 
-2.  Get `year`, `month`, `yday`, `wday`, `day`.
+``` r
+lubridate::ymd(170511)
+```
 
-3.  Add durations (exact time spans) with `ddays`, `dweeks`, ... and periods (human-interpretable time spans) with `days`, `weeks`, and especially `months`.
+    ## [1] "2017-05-11"
+
+``` r
+lubridate::ymd("2017-May-11")
+```
+
+    ## [1] "2017-05-11"
+
+1.  Get `year`, `month`, `yday`, `wday`, `day`.
+
+2.  Add durations (exact time spans) with `ddays`, `dweeks`, ... and periods (human-interpretable time spans) with `days`, `weeks`, and especially `months`.
