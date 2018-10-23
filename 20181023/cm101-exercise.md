@@ -1,30 +1,62 @@
----
-title: "STAT 547 Class Meeting 01: Writing your own Functions"
-output: github_document
----
+STAT 547 Class Meeting 01: Writing your own Functions
+================
 
-```{r}
+``` r
 library(gapminder)
 library(tidyverse)
+```
+
+    ## ── Attaching packages ──────────────────────────────────────────────────── tidyverse 1.2.1 ──
+
+    ## ✔ ggplot2 3.0.0     ✔ purrr   0.2.5
+    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.6
+    ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
+    ## ✔ readr   1.1.1     ✔ forcats 0.3.0
+
+    ## ── Conflicts ─────────────────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+
+``` r
 library(testthat)
 ```
 
+    ## 
+    ## Attaching package: 'testthat'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     matches
+
+    ## The following object is masked from 'package:purrr':
+    ## 
+    ##     is_null
+
 This worksheet is a condensed version of Jenny's stat545.com functions [part1](http://stat545.com/block011_write-your-own-function-01.html), [part2](http://stat545.com/block011_write-your-own-function-02.html), and [part3](http://stat545.com/block011_write-your-own-function-03.html).
 
-## Syntax Demo
+Syntax Demo
+-----------
 
 Let's demo the syntax of function-making.
 
-```{r}
+``` r
 square <- function(x) x^2
 square(10)
+```
 
+    ## [1] 100
+
+``` r
 square <- function(x) {
   y <- x^2
   y  # return the last line as the default
 }
 square(10)
+```
 
+    ## [1] 100
+
+``` r
 square <- function(x) {
   y <- x^2
   return(y)
@@ -33,20 +65,30 @@ square <- function(x) {
 square(10)
 ```
 
-## Motivating example: max minus min.
+    ## [1] 100
+
+Motivating example: max minus min.
+----------------------------------
 
 Find the max minus min of the gapminder life expectancy:
 
-```{r}
+``` r
 ?min
 ?max
 max(gapminder$lifeExp) - min(gapminder$lifeExp)
+```
+
+    ## [1] 59.004
+
+``` r
 pmax(c(1, 2, 3), c(2, 3, 4))
 ```
 
+    ## [1] 2 3 4
+
 Exercise: turn this into a function! i.e., write a function that returns the max minus min of a vector. Try it out on the gapminder variables.
 
-```{r}
+``` r
 max_minus_min <- function(vec) {
   maximum <- max(vec)
   minimum <- min(vec)
@@ -54,75 +96,107 @@ max_minus_min <- function(vec) {
 }
 
 max_minus_min(c(1, 2, 3, 4, 5))
+```
+
+    ## [1] 4
+
+``` r
 max_minus_min(gapminder$lifeExp)
 ```
+
+    ## [1] 59.004
 
 We'll be building on this. Development philosophy [widely attributed to the Spotify development team](http://blog.fastmonkeys.com/?utm_content=bufferc2d6e&utm_medium=social&utm_source=twitter.com&utm_campaign=buffer):
 
 ![](http://stat545.com/img/spotify-howtobuildmvp.gif)
 
-## Testing
+Testing
+-------
 
 Check your function using your own eyeballs:
 
-- Apply to the vector 1:10. Do you get the intended result?
-- Apply to a random uniform vector. Do you get meaningful results?
+-   Apply to the vector 1:10. Do you get the intended result?
+-   Apply to a random uniform vector. Do you get meaningful results?
 
-```{r}
+``` r
 max_minus_min(1:10)
+```
+
+    ## [1] 9
+
+``` r
 max_minus_min(runif(100))
 ```
 
+    ## [1] 0.9767232
+
 Let's formalize this testing with the `testthat` package. `expect_*()` functions:
 
-```{r}
+``` r
 expect_equal(0.1 + 0.2, 0.3)
 #expect_identical(0.1 + 0.2, 0.3)  # floating point error
 ```
 
 Add another check to the following unit test, based on the uniform random numbers:
 
-```{r}
+``` r
 test_that("Simple cases work", {
     expect_equal(max_minus_min(1:10), 9)
     expect_lte(max_minus_min(runif(100)), 1)
 })
 ```
 
-## Try and break your function
+Try and break your function
+---------------------------
 
 Because you will eventually forget the function specifics.
 
-```{r}
+``` r
 max_minus_min(numeric(0))
+```
+
+    ## Warning in max(vec): no non-missing arguments to max; returning -Inf
+
+    ## Warning in min(vec): no non-missing arguments to min; returning Inf
+
+    ## [1] -Inf
+
+``` r
 #max_minus_min(gapminder)
 #max_minus_min(gapminder$country)
 ```
 
 These don't break!
 
-```{r}
+``` r
 max_minus_min(gapminder[c('lifeExp', 'gdpPercap', 'pop')])
+```
+
+    ## [1] 1318683072
+
+``` r
 max_minus_min(c(TRUE, TRUE, FALSE, TRUE, TRUE))
 ```
 
+    ## [1] 1
+
 We want:
 
-1. Prevent the latter cases from happening, and
-2. Make a more informative error message in the former.
+1.  Prevent the latter cases from happening, and
+2.  Make a more informative error message in the former.
 
 Check out `stopifnot` and `stop`:
 
-```{r}
+``` r
 #stopifnot(FALSE)
 #stop("Here's my little error message.")
 ```
 
-Your turn:  Use two methods:
+Your turn: Use two methods:
 
-1. Using `stopifnot`, modify the max-min function to throw an error if an input is not numeric (the `is.numeric` function is useful).
+1.  Using `stopifnot`, modify the max-min function to throw an error if an input is not numeric (the `is.numeric` function is useful).
 
-```{r}
+``` r
 mmm1 <- function(x) {
     stopifnot(is.numeric(x))
     max(x) - min(x)
@@ -131,11 +205,13 @@ mmm1 <- function(x) {
 mmm1(1)
 ```
 
-2. Using `stop` and an `if` statement, Modify the max-min function to:
-    - throw an error if an input is not numeric. In the error message, indicate what's expected as an argument, and what was recieved. 
-    - return `NULL` if the input is length-0, with a warning using the `warning` function.
+    ## [1] 0
 
-```{r}
+1.  Using `stop` and an `if` statement, Modify the max-min function to:
+    -   throw an error if an input is not numeric. In the error message, indicate what's expected as an argument, and what was recieved.
+    -   return `NULL` if the input is length-0, with a warning using the `warning` function.
+
+``` r
 mmm2 <- function(x) {
     if (!is.numeric(x)) {
         stop(paste("Expecting x to be numeric. You gave me",
@@ -147,7 +223,7 @@ mmm2 <- function(x) {
 
 Try breaking the function now:
 
-```{r}
+``` r
 #mmm1((numeric(0)))
 #mmm1(gapminder)
 #mmm1(gapminder$country)
@@ -161,17 +237,19 @@ Try breaking the function now:
 #mmm2(c(TRUE, TRUE, FALSE, TRUE, TRUE))
 ```
 
-## Naming, and generalizing to quantile difference
+Naming, and generalizing to quantile difference
+-----------------------------------------------
 
-```{r}
+``` r
 d <- 1:10
 mmm2(d)
 ```
 
+    ## [1] 9
 
 Let's generalize the function to take the difference in two quantiles:
 
-```{r}
+``` r
 qd <- function(x, probs) {
     stopifnot(is.numeric(x))
     if (length(x) == 0) {
@@ -185,23 +263,41 @@ qd <- function(x, probs) {
 
 Try it out:
 
-```{r}
+``` r
 x <- runif(100)
 qd(x, c(0.25, 0.75))
+```
+
+    ## [1] 0.5244173
+
+``` r
 IQR(x)
+```
+
+    ## [1] 0.5244173
+
+``` r
 qd(x, c(0,1))
+```
+
+    ## [1] 0.9910997
+
+``` r
 mmm2(x)
 ```
 
-Why did I call the arguments `x` and `probs`? Check out `?quantile`. 
+    ## [1] 0.9910997
+
+Why did I call the arguments `x` and `probs`? Check out `?quantile`.
 
 If we input a vector stored in some variable, need that variable be named `x`?
 
-## Defaults
+Defaults
+--------
 
 Would be nice to have defaults for `probs`, right? Add them to the below code (which is copied and pasted from above):
 
-```{r}
+``` r
 qd2 <- function(x, probs = c(0, 1)) {
     stopifnot(is.numeric(x))
     if (length(x) == 0) {
@@ -214,18 +310,21 @@ qd2 <- function(x, probs = c(0, 1)) {
 qd2(rnorm(100))
 ```
 
-## NA handling
+    ## [1] 4.842663
+
+NA handling
+-----------
 
 Does this return what we were expecting?
 
-```{r}
+``` r
 #v <- c(1:10, NA)
 #qd2(v)
 ```
 
 Notice that `quantile()` has a `na.rm` option. Let's use it in our `qd` function. Modify the code below:
 
-```{r}
+``` r
 qd2 <- function(x, probs=c(0,1)) {
     stopifnot(is.numeric(x))
     if (length(x) == 0) {
@@ -237,11 +336,12 @@ qd2 <- function(x, probs=c(0,1)) {
 }
 ```
 
-## Ellipses
+Ellipses
+--------
 
 There are other arguments to `quantile`, like `type`, that are not used all that much. Put them in as ellipses:
 
-```{r}
+``` r
 qd2 <- function(x, probs=c(0,1), na.rm=FALSE, ...) {
     stopifnot(is.numeric(x))
     if (length(x) == 0) {
@@ -254,5 +354,12 @@ qd2 <- function(x, probs=c(0,1), na.rm=FALSE, ...) {
 
 v <- rnorm(100)
 qd2(v, probs = c(1, 0), na.rm = TRUE, 1)  # 1 will match the next argument in quantile
+```
+
+    ## [1] 4.355704
+
+``` r
 qd2(v, probs = c(1, 0), na.rm = TRUE, type = 1)
 ```
+
+    ## [1] 4.355704
