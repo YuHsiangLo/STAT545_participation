@@ -1,8 +1,6 @@
 ---
 title: "STAT 547 Class Meeting 02 Worksheet"
-output: html_notebook
-editor_options: 
-  chunk_output_type: inline
+output: github_document
 ---
 
 ```{r}
@@ -19,7 +17,7 @@ Today's lesson has been drawn from the following resources:
     - See the ["Resources" section](http://stat545.com/block028_character-data.html#resources) for a more comprehensive listing of resources based on the character problem you're facing. 
 2. [Older stat545 notes](http://stat545.com/block022_regular-expression.html)
 3. [r4ds: strings](https://r4ds.had.co.nz/strings.html).
-3. [`stringr` vignette](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
+4. [`stringr` vignette](https://cran.r-project.org/web/packages/stringr/vignettes/stringr.html)
 
 ## Basic String Manipulation
 
@@ -31,13 +29,15 @@ There's that famous sentence about the quick brown fox that contains all letters
 `str_subset(string, pattern)`
 
 ```{r}
-fox <- str_subset(FILL_THIS_IN, FILL_THIS_IN)
+(fox <- str_subset(sentences, pattern = "fox"))
 ```
 
 Not quite the sentence I was thinking of. How many words does it contain? Use `str_split(string, pattern)`, noting its output (list).
 
 ```{r}
-str_split(FILL_THIS_IN, FILL_THIS_IN)
+str_split(fox, pattern = " ")[[1]] %>% length()
+str(str_split(fox, pattern = " "))
+str_split(sentences, pattern = " ") %>% head()
 ```
 
 Exercise: does this sentence contain all letters of the alphabet? Hints: 
@@ -48,8 +48,10 @@ Exercise: does this sentence contain all letters of the alphabet? Hints:
 
 ```{r}
 fox %>% 
-  str_split(FILL_THIS_IN) %>% 
-  FILL_THIS_IN
+  str_split(pattern = "") %>%
+  `[[`(1) %>%
+  str_to_lower() %>%
+  table()
 ```
 
 
@@ -65,7 +67,7 @@ Demo: we can substitute, too. Replace the word "fox" with "giraffe" using `str_r
 
 ```{r}
 fox %>% 
-    str_replace(FILL_THIS_IN)
+    str_replace(pattern = "fox", replacement = "giraffe")
 ```
 
 Know the position you want to extract/replace? Try `str_sub()`.
@@ -73,7 +75,7 @@ Know the position you want to extract/replace? Try `str_sub()`.
 `str_pad()` extends each string to a minimum length:
 
 ```{r}
-fruit %>% head
+fruit %>% head()
 fruit %>% 
     str_pad(width=7, side="right", pad="$") %>% 
     head()
@@ -120,21 +122,21 @@ Let's make those folders!
 1. Make a character vector with entries `"01"`, `"02"`, ..., `12` with `str_pad()`.
 
 ```{r}
-(num <- str_pad(FILL_THIS_IN))
+(num <- str_pad(string = 1:12, width = 2, side = "left", pad = "0"))
 ```
 
-2. Use `str_c()` to combine `"cm1"` with the numbers:
+2. Use `str_c()` to combine `"/cm1"` with the numbers:
     - If your system uses "\" instead of "/", you might need two backslashes.
 
 ```{r}
-(folders <- str_c(FILL_THIS_IN))
+(folders <- str_c("/cm1", num, sep = ""))
 ```
 
 3. Use `testthat` to check that each entry of `folders` has 5 characters. You might find the base R `all()` function useful.
 
 ```{r}
 test_that("folder names are length 5.", {
-    expect_FILL_THIS_IN()
+    expect_true(all(str_length(folders) == 6))
 })
 ```
 
@@ -150,14 +152,15 @@ Now, let's seed the folders with README's.
 1. Add `/README.md` to the end of the folder names stored in `folders`:
 
 ```{r}
-files <- FILL_THIS_IN
+(files <- str_c(folders, "/README.md"))
 ```
 
 2. Make a vector of contents to put in each README. Put a title and body. 
     - Hint: Use `\n` to indicate a new line! This works in graphs, too.
     
 ```{r}
-contents <- FILL_THIS_IN
+(contents <- str_c("# Participation\n\n Participation for class meeting", 1:12))
+cat(contents[1]) # Show how the contents look
 ```
 
 3. BONUS: Write the README's to file using base R's `write(x, file)`:
@@ -187,7 +190,7 @@ countries <- levels(gapminder$country)
 Find all countries in the gapminder data set with the following pattern: "i", followed by any single character, followed by "a":
 
 ```{r}
-str_subset(countries, pattern = "i.a")
+str_subset(countries, pattern = "i.a")  # Case-sensitive
 ```
 
 Here, `.` stands for "any single character".
@@ -204,10 +207,9 @@ str_view_all(countries, pattern = "i.a", match=TRUE)
 Exercise: Canada isn't the only country with three interspersed "a"'s. Find the others. Try both `str_view_all()` and `str_subset()`.
 
 ```{r}
-str_view_all(FILL_THIS_IN)
-str_subset(FILL_THIS_IN)
+str_view_all(string = countries, pattern = "a.a.a", match = TRUE)
+str_subset(string = countries, pattern = "a.a.a")
 ```
-
 
 Let's define a handy function:
 
@@ -246,9 +248,8 @@ Note that not all special characters "work" within `[]`, but some do, and do not
 Exercise: Find all countries with three non-vowels next to each other.
 
 ```{r}
-str_view_all_match(countries, pattern = "YOUR_REGEX_HERE")
+str_view_all_match(countries, pattern = "[^aeiou][^aeiou][^aeiou]")
 ```
-
 
 ### Or
 
@@ -263,7 +264,6 @@ c("bear", "beer", "bar") %>%
     str_view_all_match(pattern = "be(e|a)r")
 ```
 
-
 ### Quantifiers/Repetition
 
 The handy ones are:
@@ -277,9 +277,8 @@ See list at https://r4ds.had.co.nz/strings.html#repetition
 Find all countries that have any number of o's (but at least 1) following r:
 
 ```{r}
-str_view_all_match(countries, "re+")
+str_view_all_match(countries, "ro+")
 ```
-
 
 Find all countries that have exactly two e's next two each other:
 
@@ -291,7 +290,7 @@ str_view_all_match(countries, "e{2}")
 Exercise: Find all countries that have either "a" or "e", twice in a row (with a changeover allowed, such as "ae" or "ea"):
 
 ```{r}
-str_view_all_match(countries, pattern="YOUR_REGEX_HERE")
+str_view_all_match(countries, pattern = "(a|e){2}")
 ```
 
 
